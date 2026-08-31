@@ -213,3 +213,19 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy cloudflare_dist --project-name=${{ secrets.CLOUDFLARE_PROJECT_NAME }}
+
+      # --------------------------------------------------------------------------------
+      # 🔔 SERVERCHAN NOTIFY / Server酱推送（微信）
+      # --------------------------------------------------------------------------------
+      # 将每次运行结果推送到微信（sct.ftqq.com）。
+      # 需在仓库 Settings → Secrets 中配置 SCT_SENDKEY（Server酱的 SendKey）。
+      # --------------------------------------------------------------------------------
+      - name: Notify via ServerChan
+        if: always()
+        env:
+          SCT_SENDKEY: ${{ secrets.SCT_SENDKEY }}
+        run: |
+          MSG=$'状态：${{ job.status }}\n仓库：${{ github.repository }}\n提交：${{ github.sha }}\n详情：https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+          curl -s "https://sctapi.ftqq.com/${SCT_SENDKEY}.send" \
+            --data-urlencode "title=TrendRadar 爬虫运行：${{ job.status }}" \
+            --data-urlencode "desp=${MSG}"
